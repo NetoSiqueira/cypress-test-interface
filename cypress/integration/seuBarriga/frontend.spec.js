@@ -7,7 +7,32 @@ describe('Should test at a funcional level', () =>{
 
     
     before(() =>{
-        cy.login('neto@neto.com', '1234')    
+        cy.server()
+        cy.route({
+            method: 'POST',
+            url:'/signin',
+            response:{
+                id: 1000,
+                nome: 'Usuario falso',
+                token: 'Uma string muito grande que nao ser deveria ser aceita'
+            }
+        }).as('signin')
+        cy.route({
+            method:'GET',
+            url: '/saldo',
+            response: [{
+                conta_id: 999,
+                conta: "Conta falsa 1",
+                saldo: "100.00"
+            },
+            {
+                conta_id: 9909,
+                conta: "Conta falsa 2",
+                saldo: "10000000000000.00"
+            }
+            ]
+        }).as('saldo')
+        cy.login('neto@neto.com', '12345')    
         cy.resetApp()
         
     })
@@ -58,7 +83,7 @@ describe('Should test at a funcional level', () =>{
     });
 
 
-    it.only('Should get Balance', () => {
+    it('Should get Balance', () => {
         cy.get(loc.MENU.HOME).click()
         cy.xpath(loc.SALDO.FN_XP_SALDO_CONTA('Conta para saldo')).should('contain', '534,00')
 
