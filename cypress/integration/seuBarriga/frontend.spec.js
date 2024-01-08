@@ -5,6 +5,9 @@ import '../../support/commandsContas'
 
 describe('Should test at a funcional level', () =>{
 
+    after(()=>{
+        cy.clearLocalStorage()
+    })
     
     before(() =>{
         cy.server()
@@ -33,7 +36,7 @@ describe('Should test at a funcional level', () =>{
             ]
         }).as('saldo')
         cy.login('neto@neto.com', '12345')    
-        cy.resetApp()
+       // cy.resetApp()
         
     })
 
@@ -44,20 +47,123 @@ describe('Should test at a funcional level', () =>{
 
 
     it('Create an account', () => {
+        cy.route({
+           method: 'GET',
+           url:'/contas',
+           response:[
+            {
+                id: 1,
+                nome: "Carteira",
+                visivel: true,
+                usuario_id: 1
+            },
+            {
+                id: 2,
+                nome: "bancos",
+                visivel: true,
+                usuario_id: 1
+            }
+            ] 
+        }).as('contas')
+
+        cy.route({
+            method:'POST',
+            url:'/contas',
+            response:{
+                id:3,
+                nome:"Conta de teste",
+                visivel:true,
+                usuario_id:1
+            }
+        })
+
        cy.acessarMenuConta()
+
+       cy.route({
+        method: 'GET',
+        url:'/contas',
+        response:[
+         {
+             id: 1,
+             nome: "Carteira",
+             visivel: true,
+             usuario_id: 1
+         },
+         {
+             id: 2,
+             nome: "bancos",
+             visivel: true,
+             usuario_id: 1
+         },
+         {
+            id:3,
+            nome:"Conta de teste",
+            visivel:true,
+            usuario_id:1
+        }
+         ] 
+     }).as('contasSave')
        cy.inserirConta('Conta de teste')
 
         cy.get(loc.MESSAGE).should('contain', 'Conta inserida com sucesso')
     });
 
-    it('Should update an account', () => {
+    it.only('Should update an account', () => {
+        cy.route({
+            method: 'GET',
+            url:'/contas',
+            response:[
+             {
+                 id: 1,
+                 nome: "Carteira",
+                 visivel: true,
+                 usuario_id: 1
+             },
+             {
+                 id: 2,
+                 nome: "bancos",
+                 visivel: true,
+                 usuario_id: 1
+             }
+             ] 
+         }).as('contas')
+
+         cy.route({
+            method:'PUT',
+            url:'/contas/**',
+            response: {
+                id:1,
+                nome:"Conta alterada",
+                visivel:true,
+                usuario_id:1
+            }
+         })
        // const dataHoraBrasil = new Date();
        // const dataHoraUtc = new Date(dataHoraBrasil.getTime() + (dataHoraBrasil.getTimezoneOffset() * 60000));
 
         cy.acessarMenuConta()
-        cy.xpath(loc.CONTA.FN_XP_BTN_ALTERAR('Conta para alterar')).click()
-        cy.get(loc.CONTA.NOME).clear()
+        cy.xpath(loc.CONTA.FN_XP_BTN_ALTERAR('Carteira')).click()
+        cy.get(loc.CONTA.NOME)
+        .clear()
         .type('Conta alterada')
+        cy.route({
+            method: 'GET',
+            url:'/contas',
+            response:[
+             {
+                 id: 1,
+                 nome: "Conta alterada",
+                 visivel: true,
+                 usuario_id: 1
+             },
+             {
+                 id: 2,
+                 nome: "bancos",
+                 visivel: true,
+                 usuario_id: 1
+             }
+             ] 
+         }).as('contas')
         cy.get(loc.CONTA.BTN_SALVAR_CONTA).click()
         cy.get(loc.MESSAGE).should('contain', 'Conta atualizada com sucesso!')
         
