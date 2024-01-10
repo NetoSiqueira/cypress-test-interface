@@ -20,25 +20,6 @@ describe('Should test at a funcional level', () =>{
 
     it('Create an account', () => {
         cy.route({
-           method: 'GET',
-           url:'/contas',
-           response:[
-            {
-                id: 1,
-                nome: "Carteira",
-                visivel: true,
-                usuario_id: 1
-            },
-            {
-                id: 2,
-                nome: "bancos",
-                visivel: true,
-                usuario_id: 1
-            }
-            ] 
-        }).as('contas')
-
-        cy.route({
             method:'POST',
             url:'/contas',
             response:{
@@ -267,5 +248,68 @@ describe('Should test at a funcional level', () =>{
         cy.get(loc.MENU.EXTRATO).click()
         cy.xpath(loc.EXTRATO.FN_XP_REMOVER_ELEMENTO('Movimentacao para exclusao')).click()
         cy.get(loc.MESSAGE).should('contain', 'sucesso')
+    });
+
+
+    it('Should validate data send to create an account', () => {
+       
+        const reqStub = cy.stub()
+
+        cy.route({
+            method:'POST',
+            url:'/contas',
+            response:{
+                id:3,
+                nome:"Conta de teste",
+                visivel:true,
+                usuario_id:1
+            },
+           // onRequest: req => {
+            //    expect(req.request.body.nome).to.be.empty
+           //     expect(req.request.headers).to.be.have.property('Authorization')
+           // }
+           onRequest: reqStub
+        }).as('saveContas')
+
+       cy.acessarMenuConta()
+
+       cy.route({
+        method: 'GET',
+        url:'/contas',
+        response:[
+         {
+             id: 1,
+             nome: "Carteira",
+             visivel: true,
+             usuario_id: 1
+         },
+         {
+             id: 2,
+             nome: "bancos",
+             visivel: true,
+             usuario_id: 1
+         },
+         {
+            id:3,
+            nome:"Conta de teste",
+            visivel:true,
+            usuario_id:1
+        }
+         ] 
+     }).as('contasSave')
+
+       cy.inserirConta('{CONTROL}')
+       //cy.wait('@saveContas').its('request.body.nome').should('not.be.empty')
+       cy.wait('@saveContas').then(() =>{
+        expect(reqStub.args[0][0].request.body.nome).to.be.empty
+        expect(reqStub.args[0][0].request.headers).to.be.have.property('Authorization')
+       })
+        cy.get(loc.MESSAGE).should('contain', 'Conta inserida com sucesso')
+    });
+
+    it('Should test the reponsiveness', () => {
+        cy.get('[data-test=menu-home]').should('exist').and('be.visible')
+        cy.viewport('iphone-5')
+        cy.get('[data-test=menu-home]').should('exist').and('be.not.visible')
     });
 })
