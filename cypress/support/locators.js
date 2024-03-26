@@ -5,14 +5,23 @@ const locators = {
         PASSWORD: '[data-test=passwd]',
         BTN_LOGIN: '.btn'
     },
-    
+    ALERT:{
+        MSG_SUCESSO:'.alert-success'
+    },
     MENU:{
         HOME:'[data-test=menu-home]',
         SETTINGS: '[data-test=menu-settings]',
         CONTAS: '[href="/contas"]',
         RESET: '[href="/reset"]',
         MOVIMENTACAO: '[data-test=menu-movimentacao]',
-        EXTRATO: '[data-test=menu-extrato]'
+        EXTRATO: '[data-test=menu-extrato]',
+        NOVO_USUARIO:'[href="/cadastro"]'
+    },
+    CADASTRO:{
+        NOME:'#nome',
+        EMAIL:'#email',
+        SENHA:'#senha',
+        BTN:'.btn'
     },
     CONTA:{
         NOME: '[data-test=nome]',
